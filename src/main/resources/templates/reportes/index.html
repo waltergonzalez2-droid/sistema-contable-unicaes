@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Sistema Contable</title>
+    <link rel="icon" type="image/jpeg" th:href="@{/images/unicaess.jpg}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .nav-gradient {
+            background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);
+        }
+        .unicaes-accent {
+            color: #D4AF37;
+        }
+        .report-card {
+            transition: all 0.3s ease;
+        }
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(125, 60, 60, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navbar -->
+    <nav class="nav-gradient shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a th:href="@{/dashboard}" class="flex items-center space-x-3">
+                        <!-- Logo UNICAES -->
+                        <img th:src="@{/images/unicaess.jpg}" 
+                             alt="Logo UNICAES" 
+                             class="h-12 w-auto rounded-full shadow-lg">
+                        <div>
+                            <span class="text-2xl font-bold text-white">Sistema Contable</span>
+                            <p class="unicaes-accent text-xs font-semibold">Reportes</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2 backdrop-blur-sm">
+                        <svg class="h-5 w-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <span class="text-white font-semibold" th:text="${nombreCompleto} ?: 'Usuario'">Usuario</span>
+                    </div>
+                    <form th:action="@{/logout}" method="post" class="inline">
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                            Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Reportes Financieros</h1>
+            <p class="text-gray-600">Genera y visualiza reportes contables</p>
+        </div>
+
+        <!-- Reports Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            <!-- Balance General -->
+            <div class="report-card bg-white rounded-2xl shadow-xl p-6">
+                <div class="bg-gradient-to-r from-red-700 to-red-800 rounded-xl p-4 mb-4 inline-block">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-2m0 0v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Balance General</h3>
+                <p class="text-gray-600 mb-4">Estado de la situación financiera</p>
+                <a th:href="@{/reportes/balance-general}" class="block w-full bg-gradient-to-r from-red-700 to-red-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-center">
+                    Generar Reporte
+                </a>
+            </div>
+
+            <!-- Estado de Resultados -->
+            <div class="report-card bg-white rounded-2xl shadow-xl p-6">
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-4 mb-4 inline-block">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Estado de Resultados</h3>
+                <p class="text-gray-600 mb-4">Ingresos, gastos y utilidades</p>
+                <a th:href="@{/reportes/estado-resultados}" class="block w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-center">
+                    Generar Reporte
+                </a>
+            </div>
+
+            <!-- Flujo de Efectivo -->
+            <div class="report-card bg-white rounded-2xl shadow-xl p-6">
+                <div class="bg-gradient-to-r from-red-700 to-red-800 rounded-xl p-4 mb-4 inline-block">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Flujo de Efectivo</h3>
+                <p class="text-gray-600 mb-4">Entradas y salidas de efectivo</p>
+                <a th:href="@{/reportes/flujo-efectivo}" class="block w-full bg-gradient-to-r from-red-700 to-red-800 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-center">
+                    Generar Reporte
+                </a>
+            </div>
+
+            <!-- Balance de Comprobación -->
+            <div class="report-card bg-white rounded-2xl shadow-xl p-6">
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-xl p-4 mb-4 inline-block">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Balance de Comprobación</h3>
+                <p class="text-gray-600 mb-4">Verificación de saldos</p>
+                <a th:href="@{/reportes/balance-comprobacion}" class="block w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-center">
+                    Generar Reporte
+                </a>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-8">
+            <a th:href="@{/dashboard}" class="inline-flex items-center font-semibold" style="color: #7D3C3C;" onmouseover="this.style.color='#5A2D2D'" onmouseout="this.style.color='#7D3C3C'">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

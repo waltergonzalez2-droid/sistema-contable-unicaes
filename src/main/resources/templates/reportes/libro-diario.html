@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libro Diario - Sistema Contable</title>
+    <link rel="icon" type="image/jpeg" th:href="@{/images/unicaess.jpg}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+        }
+        .nav-gradient {
+            background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);
+        }
+        .unicaes-accent {
+            color: #D4AF37;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navbar -->
+    <nav class="nav-gradient shadow-2xl no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a th:href="@{/reportes}" class="flex items-center space-x-3">
+                        <img th:src="@{/images/unicaess.jpg}" 
+                             alt="Logo UNICAES" 
+                             class="h-12 w-auto rounded-full shadow-lg">
+                        <div>
+                            <span class="text-2xl font-bold text-white">Libro Diario</span>
+                            <p class="unicaes-accent text-xs font-semibold">Registro Cronológico</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Botones de acción -->
+        <div class="no-print mb-6 flex justify-between items-center">
+            <a th:href="@{/reportes}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                ← Volver a Reportes
+            </a>
+            <button onclick="window.print()" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                🖨️ Imprimir Reporte
+            </button>
+        </div>
+
+        <!-- Reporte -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Encabezado -->
+            <div class="text-center mb-8 border-b-2 pb-6" style="border-color: #D4AF37;">
+                <h1 class="text-3xl font-bold text-gray-900">UNICAES - Sistema Contable</h1>
+                <h2 class="text-2xl font-bold text-red-800 mt-2">LIBRO DIARIO</h2>
+                <p class="text-gray-600 mt-2">Del <span th:text="${#temporals.format(fechaInicio, 'dd/MM/yyyy')}"></span> al <span th:text="${#temporals.format(fechaFin, 'dd/MM/yyyy')}"></span></p>
+            </div>
+
+            <!-- Asientos -->
+            <div th:if="${#lists.isEmpty(asientos)}" class="text-center py-12">
+                <p class="text-gray-500 text-lg">No hay asientos contables registrados en este período</p>
+            </div>
+
+            <div th:each="asiento, iterStat : ${asientos}" class="mb-6 border-2 border-yellow-200 rounded-lg p-4">
+                <!-- Encabezado del Asiento -->
+                <div class="bg-gradient-to-r from-yellow-600 to-yellow-700 text-white px-4 py-2 rounded-t-lg -mx-4 -mt-4 mb-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold">Asiento #<span th:text="${asiento.numero}"></span></span>
+                        <span th:text="${#temporals.format(asiento.fecha, 'dd/MM/yyyy')}"></span>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <p class="mb-3 text-gray-700 font-semibold" th:text="${asiento.descripcion}"></p>
+
+                <!-- Tabla de Partidas -->
+                <table class="w-full mb-3">
+                    <thead>
+                        <tr class="border-b-2 border-gray-300 text-sm">
+                            <th class="text-left py-2 px-2">Cuenta</th>
+                            <th class="text-right py-2 px-2">Debe</th>
+                            <th class="text-right py-2 px-2">Haber</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="detalle : ${asiento.detalles}" class="border-b hover:bg-yellow-50">
+                            <td class="py-2 px-2" th:text="${detalle.cuenta != null ? detalle.cuenta.codigo + ' - ' + detalle.cuenta.nombre : 'Cuenta no especificada'}"></td>
+                            <td class="py-2 px-2 text-right" th:text="${detalle.tipo == 'DEBE' ? '$' + #numbers.formatDecimal(detalle.monto, 1, 'COMMA', 2, 'POINT') : '-'}"></td>
+                            <td class="py-2 px-2 text-right" th:text="${detalle.tipo == 'HABER' ? '$' + #numbers.formatDecimal(detalle.monto, 1, 'COMMA', 2, 'POINT') : '-'}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Totales del Asiento -->
+                <div class="flex justify-end space-x-8 text-sm font-bold bg-yellow-50 py-2 px-4 rounded">
+                    <div>Total Debe: <span class="text-red-700">$<span th:text="${#aggregates.sum(asiento.detalles.?[tipo == T(com.unicaes.contabilidad.model.DetalleAsiento$TipoMovimiento).DEBE].![monto])}"></span></span></div>
+                    <div>Total Haber: <span class="text-green-700">$<span th:text="${#aggregates.sum(asiento.detalles.?[tipo == T(com.unicaes.contabilidad.model.DetalleAsiento$TipoMovimiento).HABER].![monto])}"></span></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

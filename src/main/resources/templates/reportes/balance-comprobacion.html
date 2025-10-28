@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance de Comprobación - Sistema Contable</title>
+    <link rel="icon" type="image/jpeg" th:href="@{/images/unicaess.jpg}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+        }
+        .nav-gradient {
+            background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);
+        }
+        .unicaes-accent {
+            color: #D4AF37;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navbar -->
+    <nav class="nav-gradient shadow-2xl no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a th:href="@{/reportes}" class="flex items-center space-x-3">
+                        <img th:src="@{/images/unicaess.jpg}" 
+                             alt="Logo UNICAES" 
+                             class="h-12 w-auto rounded-full shadow-lg">
+                        <div>
+                            <span class="text-2xl font-bold text-white">Balance de Comprobación</span>
+                            <p class="unicaes-accent text-xs font-semibold">Verificación de Saldos</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Botones de acción -->
+        <div class="no-print mb-6 flex justify-between items-center">
+            <a th:href="@{/reportes}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                ← Volver a Reportes
+            </a>
+            <div class="flex gap-3">
+                <a th:href="@{/reportes/balance-comprobacion/pdf(fecha=${fechaCorte})}" 
+                   class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                    📄 Descargar PDF
+                </a>
+                <a th:href="@{/reportes/balance-comprobacion/excel(fecha=${fechaCorte})}" 
+                   class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                    📊 Descargar Excel
+                </a>
+                <button onclick="window.print()" class="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                    🖨️ Imprimir Reporte
+                </button>
+            </div>
+        </div>
+
+        <!-- Reporte -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Encabezado -->
+            <div class="text-center mb-8 border-b-2 pb-6" style="border-color: #D4AF37;">
+                <h1 class="text-3xl font-bold text-gray-900">UNICAES - Sistema Contable</h1>
+                <h2 class="text-2xl font-bold text-red-800 mt-2">BALANCE DE COMPROBACIÓN</h2>
+                <p class="text-gray-600 mt-2">Al <span th:text="${#temporals.format(fechaCorte, 'dd/MM/yyyy')}"></span></p>
+            </div>
+
+            <!-- Tabla de Cuentas -->
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gradient-to-r from-red-700 to-red-800 text-white">
+                        <th class="text-left py-3 px-4">Código</th>
+                        <th class="text-left py-3 px-4">Cuenta</th>
+                        <th class="text-right py-3 px-4">Debe</th>
+                        <th class="text-right py-3 px-4">Haber</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cuenta : ${cuentas}" class="border-b hover:bg-yellow-50">
+                        <td class="py-2 px-4 font-mono text-sm" th:text="${cuenta.codigo}"></td>
+                        <td class="py-2 px-4" th:text="${cuenta.nombre}"></td>
+                        <td class="py-2 px-4 text-right font-semibold" 
+                            th:text="${cuenta.naturaleza.toString() == 'DEUDORA' && cuenta.saldo > 0 ? '$' + #numbers.formatDecimal(cuenta.saldo, 1, 'COMMA', 2, 'POINT') : '-'}"></td>
+                        <td class="py-2 px-4 text-right font-semibold" 
+                            th:text="${cuenta.naturaleza.toString() == 'ACREEDORA' && cuenta.saldo > 0 ? '$' + #numbers.formatDecimal(cuenta.saldo, 1, 'COMMA', 2, 'POINT') : '-'}"></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="bg-yellow-100 font-bold text-lg border-t-4" style="border-color: #D4AF37;">
+                        <td colspan="2" class="py-4 px-4">TOTALES:</td>
+                        <td class="py-4 px-4 text-right text-red-800" th:text="${'$' + #numbers.formatDecimal(totalDebitos, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="py-4 px-4 text-right text-green-800" th:text="${'$' + #numbers.formatDecimal(totalCreditos, 1, 'COMMA', 2, 'POINT')}"></td>
+                    </tr>
+                    <tr class="bg-gray-100 font-bold">
+                        <td colspan="2" class="py-3 px-4">DIFERENCIA:</td>
+                        <td colspan="2" class="py-3 px-4 text-right" 
+                            th:classappend="${diferencia == 0} ? 'text-green-700' : 'text-red-700'"
+                            th:text="${'$' + #numbers.formatDecimal(diferencia, 1, 'COMMA', 2, 'POINT')}"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Estado del Balance -->
+            <div class="mt-6 p-4 rounded-lg" th:classappend="${diferencia == 0} ? 'bg-green-50 border-l-4 border-green-600' : 'bg-red-50 border-l-4 border-red-600'">
+                <p class="font-bold" th:classappend="${diferencia == 0} ? 'text-green-700' : 'text-red-700'">
+                    <span th:if="${diferencia == 0}">✓ El balance está cuadrado correctamente</span>
+                    <span th:unless="${diferencia == 0}">⚠ El balance presenta una diferencia que debe ser ajustada</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

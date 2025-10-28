@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libro Mayor - Sistema Contable</title>
+    <link rel="icon" type="image/jpeg" th:href="@{/images/unicaess.jpg}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+        }
+        .nav-gradient {
+            background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);
+        }
+        .unicaes-accent {
+            color: #D4AF37;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navbar -->
+    <nav class="nav-gradient shadow-2xl no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a th:href="@{/reportes}" class="flex items-center space-x-3">
+                        <img th:src="@{/images/unicaess.jpg}" 
+                             alt="Logo UNICAES" 
+                             class="h-12 w-auto rounded-full shadow-lg">
+                        <div>
+                            <span class="text-2xl font-bold text-white">Libro Mayor</span>
+                            <p class="unicaes-accent text-xs font-semibold">Movimientos por Cuenta</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Botones de acción -->
+        <div class="no-print mb-6 flex justify-between items-center">
+            <a th:href="@{/reportes}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                ← Volver a Reportes
+            </a>
+            <button onclick="window.print()" class="bg-gradient-to-r from-red-700 to-red-800 hover:from-red-800 hover:to-red-900 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                🖨️ Imprimir Reporte
+            </button>
+        </div>
+
+        <!-- Selector de Cuenta -->
+        <div class="no-print bg-white rounded-lg shadow-md p-6 mb-6">
+            <form th:action="@{/reportes/libro-mayor}" method="get" class="flex items-center space-x-4">
+                <label class="text-gray-700 font-semibold">Seleccionar Cuenta:</label>
+                <select name="cuentaId" class="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none focus:border-yellow-600">
+                    <option value="">-- Todas las Cuentas --</option>
+                    <option th:each="cuenta : ${cuentas}" 
+                            th:value="${cuenta.id}" 
+                            th:text="${cuenta.codigo + ' - ' + cuenta.nombre}"
+                            th:selected="${cuentaSeleccionada != null && cuentaSeleccionada.id == cuenta.id}">
+                    </option>
+                </select>
+                <button type="submit" class="bg-gradient-to-r from-red-700 to-red-800 text-white px-6 py-2 rounded-lg font-semibold hover:from-red-800 hover:to-red-900">
+                    Generar
+                </button>
+            </form>
+        </div>
+
+        <!-- Reporte -->
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Encabezado -->
+            <div class="text-center mb-8 border-b-2 pb-6" style="border-color: #D4AF37;">
+                <h1 class="text-3xl font-bold text-gray-900">UNICAES - Sistema Contable</h1>
+                <h2 class="text-2xl font-bold text-red-800 mt-2">LIBRO MAYOR</h2>
+                <p class="text-gray-600 mt-2" th:if="${cuentaSeleccionada != null}">
+                    Cuenta: <span class="font-bold" th:text="${cuentaSeleccionada.codigo + ' - ' + cuentaSeleccionada.nombre}"></span>
+                </p>
+                <p class="text-gray-600 mt-2" th:unless="${cuentaSeleccionada != null}">Todas las Cuentas</p>
+            </div>
+
+            <!-- Contenido según si hay cuenta seleccionada -->
+            <div th:if="${cuentaSeleccionada != null}">
+                <!-- Información de la cuenta -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-600">
+                        <p class="text-sm text-gray-600">Tipo de Cuenta</p>
+                        <p class="text-lg font-bold text-gray-900" th:text="${cuentaSeleccionada.tipo}"></p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-600">
+                        <p class="text-sm text-gray-600">Naturaleza</p>
+                        <p class="text-lg font-bold text-gray-900" th:text="${cuentaSeleccionada.naturaleza}"></p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-600">
+                        <p class="text-sm text-gray-600">Saldo Actual</p>
+                        <p class="text-lg font-bold text-gray-900" th:text="${'$' + #numbers.formatDecimal(cuentaSeleccionada.saldo, 1, 'COMMA', 2, 'POINT')}"></p>
+                    </div>
+                </div>
+
+                <!-- Aquí irían los movimientos cuando se implemente -->
+                <div class="bg-yellow-50 p-6 rounded-lg text-center">
+                    <p class="text-gray-700">Los movimientos detallados de la cuenta se mostrarán aquí cuando se registren asientos contables relacionados.</p>
+                </div>
+            </div>
+
+            <!-- Listado de todas las cuentas -->
+            <div th:unless="${cuentaSeleccionada != null}">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-red-700 to-red-800 text-white">
+                            <th class="text-left py-3 px-4">Código</th>
+                            <th class="text-left py-3 px-4">Nombre</th>
+                            <th class="text-center py-3 px-4">Tipo</th>
+                            <th class="text-center py-3 px-4">Naturaleza</th>
+                            <th class="text-right py-3 px-4">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cuenta : ${cuentas}" class="border-b hover:bg-yellow-50">
+                            <td class="py-3 px-4 font-mono text-sm" th:text="${cuenta.codigo}"></td>
+                            <td class="py-3 px-4" th:text="${cuenta.nombre}"></td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                      th:classappend="${cuenta.tipo.name() == 'ACTIVO'} ? 'bg-blue-100 text-blue-800' : ${cuenta.tipo.name() == 'PASIVO'} ? 'bg-red-100 text-red-800' : ${cuenta.tipo.name() == 'PATRIMONIO'} ? 'bg-purple-100 text-purple-800' : ${cuenta.tipo.name() == 'INGRESO'} ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'"
+                                      th:text="${cuenta.tipo}">
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                      th:classappend="${cuenta.naturaleza.name() == 'DEUDORA'} ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'"
+                                      th:text="${cuenta.naturaleza}">
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-right font-semibold" th:text="${'$' + #numbers.formatDecimal(cuenta.saldo, 1, 'COMMA', 2, 'POINT')}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

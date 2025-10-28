@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Período - Sistema Contable</title>
+    <link rel="icon" type="image/jpeg" th:href="@{/images/unicaess.jpg}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .nav-gradient {
+            background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);
+        }
+        .unicaes-accent {
+            color: #D4AF37;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navbar -->
+    <nav class="nav-gradient shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a th:href="@{/dashboard}" class="flex items-center space-x-3">
+                        <!-- Logo UNICAES -->
+                        <img th:src="@{/images/unicaess.jpg}" 
+                             alt="Logo UNICAES" 
+                             class="h-12 w-auto rounded-full shadow-lg">
+                        <div>
+                            <span class="text-2xl font-bold text-white">Sistema Contable</span>
+                            <p class="unicaes-accent text-xs font-semibold">Nuevo Período</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2 backdrop-blur-sm">
+                        <svg class="h-5 w-5 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <span class="text-white font-semibold" th:text="${nombreCompleto} ?: 'Usuario'">Usuario</span>
+                    </div>
+                    <form th:action="@{/logout}" method="post" class="inline">
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                            Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${periodo.id == null ? 'Nuevo Período Contable' : 'Editar Período Contable'}"></title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .unicaes-red-bg {
+            background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);
+        }
+        .input-focus:focus {
+            border-color: #7D3C3C;
+            --tw-ring-color: #7D3C3C;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Header -->
+    <div class="unicaes-red-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img th:src="@{/images/unicaess.jpg}" alt="UNICAES" class="h-12">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Sistema Contable</h1>
+                        <p class="text-red-100 text-sm">Universidad Católica de El Salvador</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="flex items-center mb-6">
+                <div class="rounded-full p-3 mr-4" style="background: linear-gradient(135deg, #7D3C3C 0%, #5A2D2D 100%);">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900" th:text="${periodo.id == null ? 'Nuevo Período Contable' : 'Editar Período Contable'}"></h2>
+            </div>
+            
+            <!-- Mensajes de Error/Éxito -->
+            <div th:if="${error}" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                <div class="flex">
+                    <svg class="h-6 w-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-red-700" th:text="${error}"></p>
+                </div>
+            </div>
+            
+            <form th:action="@{${periodo.id == null ? '/periodos/nuevo' : '/periodos/' + periodo.id + '/editar'}}" method="POST" th:object="${periodo}">
+                <input type="hidden" th:field="*{id}">
+                
+                <div class="space-y-6">
+                    <!-- Año -->
+                    <div>
+                        <label for="año" class="flex items-center text-sm font-bold text-gray-700 mb-2">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #7D3C3C;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Año
+                        </label>
+                        <input type="number" id="año" name="año" th:field="*{año}" required min="2000" max="2100"
+                               placeholder="Ej: 2025"
+                               class="input-focus mt-1 block w-full border-2 border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:outline-none transition-all duration-200">
+                    </div>
+
+                    <!-- Mes -->
+                    <div>
+                        <label for="mes" class="flex items-center text-sm font-bold text-gray-700 mb-2">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #7D3C3C;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Mes
+                        </label>
+                        <select id="mes" name="mes" th:field="*{mes}" required
+                                class="input-focus mt-1 block w-full bg-white border-2 border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:outline-none transition-all duration-200">
+                            <option value="">Seleccione un mes</option>
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+
+                    <!-- Estado -->
+                    <div>
+                        <label for="estado" class="flex items-center text-sm font-bold text-gray-700 mb-2">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #7D3C3C;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Estado
+                        </label>
+                        <select id="estado" name="estado" th:field="*{estado}" required
+                                class="input-focus mt-1 block w-full bg-white border-2 border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:outline-none transition-all duration-200">
+                            <option value="">Seleccione un estado</option>
+                            <option value="ABIERTO">ABIERTO</option>
+                            <option value="CERRADO">CERRADO</option>
+                            <option value="EN_PROCESO">EN PROCESO</option>
+                        </select>
+                    </div>
+
+                    <!-- Nota informativa -->
+                    <div class="rounded-xl p-4 border-2" style="background-color: rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.3);">
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20" style="color: #D4AF37;">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-gray-700 font-semibold">Nota:</p>
+                                <p class="text-sm text-gray-600">Las fechas de inicio y fin se calcularán automáticamente basadas en el año y mes seleccionados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center justify-end space-x-4">
+                    <a th:href="@{/periodos}" class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold shadow-md transition-all duration-300">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Guardar Período
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Auto-establecer el año actual si es nuevo período
+        window.addEventListener('DOMContentLoaded', function() {
+            const añoInput = document.getElementById('año');
+            if (!añoInput.value) {
+                añoInput.value = new Date().getFullYear();
+            }
+        });
+    </script>
+</body>
+</html>
+        </div>
+    </div>
+</body>
+</html>
