@@ -29,7 +29,7 @@ public class PdfGeneratorService {
     private static final DeviceRgb LIGHT_GRAY = new DeviceRgb(240, 240, 240);
     
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final NumberFormat MONEY_FORMAT = NumberFormat.getCurrencyInstance(Locale.of("es", "US"));
+    private static final NumberFormat MONEY_FORMAT = NumberFormat.getCurrencyInstance(new Locale("es", "US"));
 
     public byte[] generateBalanceGeneral(List<Cuenta> activos, List<Cuenta> pasivos,
                                           List<Cuenta> patrimonio, BigDecimal totalActivos,
