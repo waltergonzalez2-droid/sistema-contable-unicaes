@@ -19,7 +19,7 @@ Sistema de Contabilidad desarrollado con Spring Boot para la gestión de cuentas
 
 - **Backend**: Spring Boot 3.5.0
 - **Java**: 21
-- **Base de Datos**: Oracle Database 21c
+- **Base de Datos**: MySQL 8.0+
 - **ORM**: Hibernate/JPA
 - **Seguridad**: Spring Security
 - **Frontend**: Thymeleaf + Tailwind CSS
@@ -29,7 +29,7 @@ Sistema de Contabilidad desarrollado con Spring Boot para la gestión de cuentas
 
 - Java JDK 21 o superior
 - Maven 3.8+
-- Oracle Database 21c (o Oracle XE)
+- MySQL 8.0+ o MariaDB 10.5+
 - Git (para clonar el repositorio)
 
 ## 🚀 Instalación
@@ -43,28 +43,45 @@ cd sistema-contable
 
 ### 2. Configurar la Base de Datos
 
-Ejecuta los siguientes scripts SQL en Oracle:
+Ejecuta el siguiente script SQL en MySQL como root o usuario con privilegios:
 
-```sql
--- 1. Crear usuario
-@src/main/resources/db/create_user.sql
+```bash
+# Conectar a MySQL como root
+mysql -u root -p
 
--- 2. Crear tabla de usuarios
-@src/main/resources/db/create_usuarios.sql
+# Ejecutar el script de creación
+source src/main/resources/db/create_user.sql
+```
 
--- 3. Agregar columna de rol
-@src/main/resources/db/add_rol_column.sql
+Este script creará:
+- La base de datos `sistema_contable`
+- El usuario `contabilidad` con contraseña `walter120706`
+- Los permisos necesarios para el usuario
+
+Luego, si deseas crear las tablas manualmente (opcional, Hibernate las creará automáticamente):
+
+```bash
+# Conectar con el usuario creado
+mysql -u contabilidad -p sistema_contable
+
+# Ejecutar scripts de tablas (opcional)
+source src/main/resources/db/create_usuarios.sql
+source src/main/resources/db/add_rol_column.sql
 ```
 
 ### 3. Configurar application.properties
 
-Edita `src/main/resources/application.properties` con tus credenciales:
+La configuración por defecto ya está lista para MySQL:
 
 ```properties
-spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1
-spring.datasource.username=TU_USUARIO
-spring.datasource.password=TU_PASSWORD
+spring.datasource.url=jdbc:mysql://localhost:3306/sistema_contable
+spring.datasource.username=contabilidad
+spring.datasource.password=walter120706
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 ```
+
+Si necesitas cambiar las credenciales, edita `src/main/resources/application.properties`.
 
 ### 4. Compilar y Ejecutar
 
@@ -136,12 +153,20 @@ Sistema Contable/
 
 ## 🐛 Solución de Problemas
 
-### Error de conexión a Oracle
+### Error de conexión a MySQL
 ```bash
-# Verifica que Oracle esté corriendo
-lsnrctl status
+# Verifica que MySQL esté corriendo
+sudo systemctl status mysql
 
 # Verifica las credenciales en application.properties
+# Verifica que el usuario 'contabilidad' tenga permisos
+mysql -u root -p -e "SHOW GRANTS FOR 'contabilidad'@'localhost';"
+```
+
+### Error "Public Key Retrieval is not allowed"
+Si encuentras este error, agrega `allowPublicKeyRetrieval=true` a la URL:
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/sistema_contable?allowPublicKeyRetrieval=true
 ```
 
 ### Puerto 8080 ya en uso

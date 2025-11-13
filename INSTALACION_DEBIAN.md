@@ -46,50 +46,30 @@ sudo apt install maven -y
 mvn -version
 ```
 
-## 🗄️ Paso 4: Instalar Oracle Database
-
-### Opción A: Oracle XE con Docker (Recomendado)
+## 🗄️ Paso 4: Instalar MySQL Server
 
 ```bash
-# Instalar Docker
-sudo apt install docker.io -y
-sudo systemctl start docker
-sudo systemctl enable docker
+# Instalar MySQL Server
+sudo apt install mysql-server -y
 
-# Agregar tu usuario al grupo docker
-sudo usermod -aG docker $USER
-newgrp docker
+# Verificar que MySQL está corriendo
+sudo systemctl status mysql
 
-# Descargar Oracle Database XE 21c
-docker pull container-registry.oracle.com/database/express:21.3.0-xe
+# Iniciar MySQL si no está corriendo
+sudo systemctl start mysql
+sudo systemctl enable mysql
 
-# Ejecutar Oracle en Docker
-docker run -d \
-  --name oracle-xe \
-  -p 1521:1521 \
-  -p 5500:5500 \
-  -e ORACLE_PWD=Admin123 \
-  -e ORACLE_CHARACTERSET=AL32UTF8 \
-  container-registry.oracle.com/database/express:21.3.0-xe
+# Asegurar la instalación de MySQL (opcional pero recomendado)
+sudo mysql_secure_installation
+# Responde las preguntas:
+# - Set root password? [Y/n] Y (establece una contraseña segura)
+# - Remove anonymous users? [Y/n] Y
+# - Disallow root login remotely? [Y/n] Y
+# - Remove test database? [Y/n] Y
+# - Reload privilege tables now? [Y/n] Y
 
-# Esperar a que Oracle inicie (puede tomar 5-10 minutos)
-docker logs -f oracle-xe
-```
-
-### Opción B: Oracle XE Nativo
-
-```bash
-# Descargar Oracle XE desde el sitio oficial
-# https://www.oracle.com/database/technologies/xe-downloads.html
-
-# Instalar dependencias
-sudo apt install alien libaio1 -y
-
-# Convertir RPM a DEB
-sudo alien -i oracle-database-xe-21c*.rpm
-
-# Configurar Oracle
-sudo /etc/init.d/oracle-xe-21c configure
+# Verificar instalación
+mysql --version
 ```
 
 ## 📥 Paso 5: Clonar el Proyecto
@@ -106,32 +86,49 @@ cd sistema-contable
 
 ## 🔑 Paso 6: Configurar la Base de Datos
 
-### Conectar a Oracle
+### Conectar a MySQL como root
 
 ```bash
-# Si usas Docker
-docker exec -it oracle-xe sqlplus sys/Admin123@XEPDB1 as sysdba
-
-# Si usas instalación nativa
-sqlplus sys/Admin123@localhost:1521/XEPDB1 as sysdba
+# Conectar a MySQL
+sudo mysql -u root -p
+# Ingresa la contraseña de root que estableciste
 ```
 
 ### Ejecutar Scripts SQL
 
 ```sql
--- 1. Crear usuario (ya conectado como sys)
-@src/main/resources/db/create_user.sql
+-- 1. Crear base de datos y usuario (ejecuta línea por línea)
+CREATE DATABASE IF NOT EXISTS sistema_contable
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 
--- 2. Conectar como el nuevo usuario
-CONNECT contabilidad_user/password123@XEPDB1
+CREATE USER IF NOT EXISTS 'contabilidad'@'localhost' IDENTIFIED BY 'walter120706';
 
--- 3. Crear tablas
-@src/main/resources/db/create_usuarios.sql
-@src/main/resources/db/add_rol_column.sql
+GRANT ALL PRIVILEGES ON sistema_contable.* TO 'contabilidad'@'localhost';
 
--- Salir
+FLUSH PRIVILEGES;
+
+-- 2. Verificar que se creó correctamente
+SHOW DATABASES;
+SELECT User, Host FROM mysql.user WHERE User='contabilidad';
+
+-- 3. Salir
 EXIT;
 ```
+
+### Verificar conexión con el nuevo usuario
+
+```bash
+# Conectar con el usuario creado
+mysql -u contabilidad -p sistema_contable
+# Contraseña: walter120706
+
+# Dentro de MySQL, verifica la base de datos
+SHOW TABLES;
+EXIT;
+```
+
+**Nota:** Las tablas se crearán automáticamente cuando ejecutes la aplicación Spring Boot por primera vez (gracias a `spring.jpa.hibernate.ddl-auto=update`).
 
 ## ⚙️ Paso 7: Configurar application.properties
 
@@ -140,12 +137,16 @@ EXIT;
 nano src/main/resources/application.properties
 ```
 
-Ajusta estas líneas:
+La configuración por defecto ya está lista para MySQL:
 ```properties
-spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1
-spring.datasource.username=contabilidad_user
-spring.datasource.password=password123
+spring.datasource.url=jdbc:mysql://localhost:3306/sistema_contable
+spring.datasource.username=contabilidad
+spring.datasource.password=walter120706
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 ```
+
+Si cambiaste la contraseña del usuario, actualiza la línea correspondiente.
 
 Guarda con `Ctrl+O`, Enter, y sal con `Ctrl+X`.
 
@@ -209,20 +210,20 @@ Ctrl+C
 pkill -f spring-boot
 ```
 
-### Ver logs de Oracle Docker
+### Ver logs de MySQL
 ```bash
-docker logs -f oracle-xe
+sudo tail -f /var/log/mysql/error.log
 ```
 
-### Reiniciar Oracle Docker
+### Reiniciar MySQL
 ```bash
-docker restart oracle-xe
+sudo systemctl restart mysql
 ```
 
 ### Ver servicios corriendo
 ```bash
 sudo netstat -tulpn | grep :8080
-sudo netstat -tulpn | grep :1521
+sudo netstat -tulpn | grep :3306
 ```
 
 ## 🎯 Ejecutar como Servicio (Opcional)
@@ -258,28 +259,46 @@ sudo systemctl status sistema-contable
 
 ## ✅ Verificación Final
 
-1. ✅ Oracle corriendo: `docker ps` o `lsnrctl status`
+1. ✅ MySQL corriendo: `sudo systemctl status mysql`
 2. ✅ Aplicación corriendo: `curl http://localhost:8080/api/contabilidad/login`
 3. ✅ Acceso desde Windows: Navegar a `http://IP-DEBIAN:8080/api/contabilidad/login`
 
 ## 🐛 Solución de Problemas
 
-### Oracle no inicia
+### MySQL no inicia
 ```bash
 # Ver logs
-docker logs oracle-xe
+sudo journalctl -u mysql.service -n 50
 
-# Reiniciar contenedor
-docker restart oracle-xe
+# Ver estado
+sudo systemctl status mysql
+
+# Reiniciar servicio
+sudo systemctl restart mysql
 ```
 
-### Aplicación no conecta a Oracle
+### Aplicación no conecta a MySQL
 ```bash
-# Verificar que Oracle esté escuchando
-docker exec oracle-xe lsnrctl status
+# Verificar que MySQL esté escuchando
+sudo netstat -tulpn | grep 3306
 
 # Verificar conexión
-docker exec -it oracle-xe sqlplus sys/Admin123@XEPDB1 as sysdba
+mysql -u contabilidad -p sistema_contable
+
+# Verificar permisos del usuario
+sudo mysql -u root -p -e "SHOW GRANTS FOR 'contabilidad'@'localhost';"
+```
+
+### Error "Access denied"
+```bash
+# Recrear usuario
+sudo mysql -u root -p
+# En MySQL:
+DROP USER IF EXISTS 'contabilidad'@'localhost';
+CREATE USER 'contabilidad'@'localhost' IDENTIFIED BY 'walter120706';
+GRANT ALL PRIVILEGES ON sistema_contable.* TO 'contabilidad'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
 ```
 
 ### Puerto 8080 ocupado
@@ -293,15 +312,16 @@ sudo kill -9 PID
 
 ## 📝 Notas Importantes
 
-- Oracle en Docker tarda ~5-10 minutos en iniciar la primera vez
-- Asegúrate de tener al menos 2GB de RAM asignados a la VM
+- MySQL se inicia instantáneamente (a diferencia de Oracle que puede tardar minutos)
+- Asegúrate de tener al menos 1GB de RAM asignados a la VM
 - El usuario ADMIN se crea automáticamente al registrar el primer usuario
+- Las tablas se crean automáticamente gracias a Hibernate
 
 ## 🎓 Para Presentación
 
 Si necesitas demostrar el sistema:
-1. Inicia Oracle: `docker start oracle-xe`
-2. Espera 2-3 minutos
+1. Verifica MySQL: `sudo systemctl status mysql`
+2. Si no está corriendo: `sudo systemctl start mysql`
 3. Ejecuta la app: `mvn spring-boot:run`
 4. Accede desde cualquier navegador en la red local
 
